@@ -1,13 +1,13 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { 
+import {
   FileCode, Users, Brain, Cpu, BarChart3, Code2,
   Globe, Smartphone, Radio, Bot, Cloud, LineChart,
   FileText, Linkedin, MessageSquare, Map, Briefcase, TrendingUp
 } from "lucide-react"
-import type { UserCategory } from "@/lib/types"
-import { categoryContent } from "@/lib/category-data"
+import type { UserCategory, Service } from "@/lib/types"
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   FileCode, Users, Brain, Cpu, BarChart3, Code2,
@@ -41,8 +41,35 @@ const itemVariants = {
   },
 }
 
+type FetchedService = Service & { id: number | string }
+
 export default function ServicesSection({ category }: ServicesSectionProps) {
-  const services = categoryContent[category].services
+  const [services, setServices] = useState<FetchedService[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    const params = new URLSearchParams({
+      'where[category][equals]': category,
+      sort: 'createdAt',
+      limit: '100',
+    })
+
+    fetch(`/api/services?${params.toString()}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load services: ${res.status}`)
+        return res.json()
+      })
+      .then((data) => {
+        if (!cancelled) setServices(data.docs ?? [])
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [category])
 
   return (
     <section id="services" className="relative py-24 md:py-32 overflow-hidden">
@@ -90,7 +117,7 @@ export default function ServicesSection({ category }: ServicesSectionProps) {
             const Icon = iconMap[service.icon] || FileCode
             return (
               <motion.div
-                key={service.title}
+                key={service.id}
                 variants={itemVariants}
                 className="group relative p-6 md:p-8 rounded-2xl bg-card/50 border border-border hover:border-primary/30 transition-all duration-500"
                 whileHover={{ y: -4 }}
