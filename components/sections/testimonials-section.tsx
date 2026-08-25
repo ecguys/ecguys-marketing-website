@@ -1,9 +1,9 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Quote } from "lucide-react"
-import type { UserCategory } from "@/lib/types"
-import { categoryContent } from "@/lib/category-data"
+import type { UserCategory, Testimonial } from "@/lib/types"
 
 interface TestimonialsSectionProps {
   category: UserCategory
@@ -31,8 +31,35 @@ const itemVariants = {
   },
 }
 
+type FetchedTestimonial = Testimonial & { id: number | string }
+
 export default function TestimonialsSection({ category }: TestimonialsSectionProps) {
-  const testimonials = categoryContent[category].testimonials
+  const [testimonials, setTestimonials] = useState<FetchedTestimonial[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    const params = new URLSearchParams({
+      'where[category][equals]': category,
+      sort: 'createdAt',
+      limit: '100',
+    })
+
+    fetch(`/api/testimonials?${params.toString()}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load testimonials: ${res.status}`)
+        return res.json()
+      })
+      .then((data) => {
+        if (!cancelled) setTestimonials(data.docs ?? [])
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [category])
 
   return (
     <section id="testimonials" className="relative py-24 md:py-32 overflow-hidden">
@@ -78,7 +105,7 @@ export default function TestimonialsSection({ category }: TestimonialsSectionPro
         >
           {testimonials.map((testimonial, index) => (
             <motion.div
-              key={testimonial.name}
+              key={testimonial.id}
               variants={itemVariants}
               className="group relative p-6 md:p-8 rounded-2xl bg-card/50 border border-border hover:border-primary/30 transition-all duration-500"
               whileHover={{ y: -4 }}

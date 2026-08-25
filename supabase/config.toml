@@ -1,0 +1,5 @@
+[functions.send-signup-emails]
+# Invoked by a Postgres trigger (pg_net), not by an authenticated Supabase client,
+# so it can't carry a user JWT. It authenticates the caller itself via the
+# x-webhook-secret header (checked against the DB_WEBHOOK_SECRET function secret).
+verify_jwt = false

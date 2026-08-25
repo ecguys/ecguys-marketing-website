@@ -1,10 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Send, CheckCircle2, Loader2, Mail, Phone, MapPin } from "lucide-react"
 import type { UserCategory } from "@/lib/types"
-import { supabase } from '@/lib/supabaseClient'
 
 interface ContactSectionProps {
   category: UserCategory
@@ -16,9 +15,22 @@ const categoryLabels: Record<UserCategory, string> = {
   career: "Career Mentoring",
 }
 
+interface SiteSettings {
+  email: string
+  phone: string
+  locations: string
+}
+
+const defaultSiteSettings: SiteSettings = {
+  email: "hello@ecguys.com",
+  phone: "+44 (0) 123 456 7890",
+  locations: "UK • Ireland • India • Gulf",
+}
+
 export default function ContactSection({ category }: ContactSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(defaultSiteSettings)
   const [formData, setFormData] = useState({
     name: "",
     institution: "",
@@ -27,27 +39,46 @@ export default function ContactSection({ category }: ContactSectionProps) {
     message: "",
     newsletter: false,
   })
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetch('/api/globals/site-settings')
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load site settings: ${res.status}`)
+        return res.json()
+      })
+      .then((data: SiteSettings) => {
+        if (!cancelled) setSiteSettings(data)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 const handleSubmit = async (e: React.FormEvent) => {
-  console.log("Submit button clicked")
   e.preventDefault()
   setIsSubmitting(true)
 
-  const { error } = await supabase
-    .from('leads') // your table name
-    .insert([
-      {
-        name: formData.name,
-        institution: formData.institution,
-        email: formData.email,
-        phone: formData.phone,
-        message: formData.message,
-        category: category,
-        newsletter: formData.newsletter,
-      }
-    ])
+  const res = await fetch('/api/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: formData.name,
+      institution: formData.institution,
+      email: formData.email,
+      phone: formData.phone,
+      message: formData.message,
+      category: category,
+      newsletter: formData.newsletter,
+    }),
+  })
 
-  if (error) {
-    console.error(error)
+  if (!res.ok) {
+    console.error(await res.text())
     alert("Something went wrong ❌")
     setIsSubmitting(false)
     return
@@ -104,9 +135,9 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* Contact Info */}
             <div className="space-y-6">
               {[
-                { icon: Mail, label: "Email", value: "hello@ecguys.com" },
-                { icon: Phone, label: "Phone", value: "+44 (0) 123 456 7890" },
-                { icon: MapPin, label: "Locations", value: "UK • Ireland • India • Gulf" },
+                { icon: Mail, label: "Email", value: siteSettings.email },
+                { icon: Phone, label: "Phone", value: siteSettings.phone },
+                { icon: MapPin, label: "Locations", value: siteSettings.locations },
               ].map((item, index) => {
                 const Icon = item.icon
                 return (
