@@ -11,7 +11,6 @@ const achievements = [
 
 const highlights = [
   "Diploma, Bachelor's, and Master's expertise in Electronics & CS",
-  "Partnership with UK-based companies",
   "Cross-functional team covering diverse technical domains",
   "Personalized approach for every client",
 ]
@@ -47,12 +46,6 @@ export default function AboutSection() {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 tracking-tight">
               Built by <span className="text-gradient-accent">Experts</span>, for Excellence
             </h2>
-            
-            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              ECGuys was founded by <span className="text-foreground font-medium">Abhi</span>, who began by helping students with projects and programming. 
-              What started as a passion for teaching evolved into a global consulting firm, partnering with 
-              <span className="text-foreground font-medium"> Biphi</span> and <span className="text-foreground font-medium">Bazil</span>—each bringing unique technical expertise.
-            </p>
             
             {/* Highlights */}
             <div className="space-y-4">
