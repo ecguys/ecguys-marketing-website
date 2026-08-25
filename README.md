@@ -211,3 +211,4 @@ For issues or questions:
 Created for ECGuys - Premium Consulting Platform  
 Built with v0 by Vercel  
 © 2026 ECGuys. All rights reserved.
+Vercel deployment update
