@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Send, CheckCircle2, Loader2, Mail, Phone, MapPin } from "lucide-react"
+import { Send, CheckCircle2, Loader2, Mail, MapPin } from "lucide-react"
 import type { UserCategory } from "@/lib/types"
 
 interface ContactSectionProps {
@@ -17,13 +17,11 @@ const categoryLabels: Record<UserCategory, string> = {
 
 interface SiteSettings {
   email: string
-  phone: string
   locations: string
 }
 
 const defaultSiteSettings: SiteSettings = {
   email: "hello@ecguys.com",
-  phone: "+44 (0) 123 456 7890",
   locations: "UK • Ireland • India • Gulf",
 }
 
@@ -136,7 +134,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             <div className="space-y-6">
               {[
                 { icon: Mail, label: "Email", value: siteSettings.email },
-                { icon: Phone, label: "Phone", value: siteSettings.phone },
                 { icon: MapPin, label: "Locations", value: siteSettings.locations },
               ].map((item, index) => {
                 const Icon = item.icon
